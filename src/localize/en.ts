@@ -107,6 +107,8 @@ export const en: { [key: string]: string } = {
   used_group: "Groups",
   used_person: "People",
   used_dashboard: "Dashboards",
+  suggest_product: "Highlighted from the product type: {0}",
+  suggest_light_level: "Highlighted because the resource is a light level.",
   add_binary_sensor_button: "Binary sensor",
   add_light_button: "Light",
   add_sensor_button: "Sensor",

@@ -101,6 +101,8 @@ export const et: { [key: string]: string } = {
   used_group: "Grupid",
   used_person: "Isikud",
   used_dashboard: "Töölauad",
+  suggest_product: "Esile tõstetud tootetüübi põhjal: {0}",
+  suggest_light_level: "Esile tõstetud, sest ressurss on valgustase.",
   add_binary_sensor_button: "Binaarne andur",
   add_light_button: "Valgusti",
   add_sensor_button: "Andur",

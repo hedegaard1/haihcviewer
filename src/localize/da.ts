@@ -101,6 +101,8 @@ export const da: { [key: string]: string } = {
   used_group: "Grupper",
   used_person: "Personer",
   used_dashboard: "Dashboards",
+  suggest_product: "Fremhævet ud fra produkttypen: {0}",
+  suggest_light_level: "Fremhævet fordi ressourcen er et lysniveau.",
   add_binary_sensor_button: "Binær sensor",
   add_light_button: "Lys",
   add_sensor_button: "Sensor",

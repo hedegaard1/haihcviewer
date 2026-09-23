@@ -18,8 +18,57 @@ import {
   resourceMatches,
   slugify,
   suggestName,
+  suggestPlatform,
   usedBy,
 } from "../src/logic.ts";
+
+describe("suggestPlatform", () => {
+  const product = (ProductIdentifier, IhcIcon = "") => ({ ProductIdentifier, IhcIcon });
+
+  test("an output on a lamp outlet or a dimmer is a light", () => {
+    assert.equal(suggestPlatform("bool", false, product("_0x2202"), false), "light");
+    assert.equal(suggestPlatform("bool", false, product("_0x4302"), false), "light");
+    assert.equal(suggestPlatform("bool", false, product("_0x4403"), false), "light");
+  });
+
+  test("an output on a socket, a relay or a sounder is a switch", () => {
+    for (const id of ["_0x2201", "_0x4201", "_0x4203", "_0x4204", "_0x2203"]) {
+      assert.equal(suggestPlatform("bool", false, product(id), false), "switch", id);
+    }
+  });
+
+  test("a product type not in the table goes by its ihc icon number", () => {
+    assert.equal(suggestPlatform("bool", false, product("_0x9999", "_0x86"), false), "light");
+    assert.equal(suggestPlatform("bool", false, product("_0x9999", "_0x88"), false), "switch");
+    assert.equal(suggestPlatform("bool", false, product("_0x9999", "_0x84"), false), "switch");
+  });
+
+  test("an input on a product is read: a binary sensor, or a sensor for a number", () => {
+    assert.equal(suggestPlatform("bool", false, product("_0x2102"), true), "binary_sensor");
+    assert.equal(suggestPlatform("bool", false, product("_0x210e"), true), "binary_sensor");
+    assert.equal(suggestPlatform("float", false, product("_0x2124"), true), "sensor");
+    assert.equal(suggestPlatform("int", false, product("_0x2136"), true), "sensor");
+  });
+
+  test("a light level is a light, product or not", () => {
+    assert.equal(suggestPlatform("int", true, null, true), "light");
+    assert.equal(suggestPlatform("int", true, product("_0x4302"), false), "light");
+  });
+
+  test("nothing is guessed when nothing is known", () => {
+    // A function block has no product, and an unknown product type with an
+    // unknown icon number says nothing either
+    assert.equal(suggestPlatform("bool", false, null, false), "");
+    assert.equal(suggestPlatform("bool", false, null, true), "");
+    assert.equal(suggestPlatform("bool", false, product("_0x9999", "_0x99"), false), "");
+  });
+
+  test("the leds on a button are not taken for a button", () => {
+    // An output on a status button lights one of its leds - neither a light
+    // nor a switch is the obvious answer, so there is no suggestion
+    assert.equal(suggestPlatform("bool", false, product("_0x2108", "_0x85"), false), "");
+  });
+});
 
 describe("usedBy", () => {
   // The shape search/related answers in: kind -> ids

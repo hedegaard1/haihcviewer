@@ -101,6 +101,8 @@ export const nb: { [key: string]: string } = {
   used_group: "Grupper",
   used_person: "Personer",
   used_dashboard: "Dashbord",
+  suggest_product: "Fremhevet ut fra produkttypen: {0}",
+  suggest_light_level: "Fremhevet fordi ressursen er et lysnivå.",
   add_binary_sensor_button: "Binær sensor",
   add_light_button: "Lys",
   add_sensor_button: "Sensor",

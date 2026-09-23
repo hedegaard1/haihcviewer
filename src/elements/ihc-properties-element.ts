@@ -11,7 +11,7 @@ import { IhcTreeNode, platformLabel } from "./ihc-tree-node";
 import { IHCInput, IHCResource } from "../ihcproject";
 import { hasProductIcon } from "../icons";
 import { localize } from "../localize";
-import { isEntityId, suggestName } from "../logic";
+import { isEntityId, suggestName, suggestPlatform } from "../logic";
 import { LitElement, css, html } from 'lit';
 
 require("../dialogs/ihc-resource-dlg");
@@ -370,18 +370,18 @@ export class IhcPropertiesElement extends LitElement {
         border-color: var(--error-color, #db4437);
         color: var(--error-color, #db4437);
       }
-      /* On an input, the two platforms that write to the controller are drawn
-         in grey rather than in the theme colour - they are still worth having,
-         but on a button they are not the obvious answer.
+      /* The platforms that are not the obvious answer are drawn in grey rather
+         than in the theme colour - they are still worth having, but the one
+         left in colour is what the thing most likely is (see suggestion).
          In the secondary text colour, not the divider colour: the divider is
          barely visible in a theme like Graphite, and a button whose outline
          cannot be seen does not look like a button at all. The difference is
          carried by the line under it, not by taking the edge away. */
-      .actionlist button.writes {
+      .actionlist button.other {
         border-color: var(--secondary-text-color);
         color: var(--secondary-text-color);
       }
-      .actionlist button.writes:hover {
+      .actionlist button.other:hover {
         border-color: var(--primary-color);
         color: var(--primary-color);
       }
@@ -584,6 +584,7 @@ export class IhcPropertiesElement extends LitElement {
             <div class="note">${localize("manual_help")}</div>
           </div>` : ""}
       </div>
+      ${canAdd && this.suggestion() ? html`<div class="note">${this.suggestionReason()}</div>` : ""}
       ${this.changeError ? html`<div class="warning">${localize(this.changeError)}</div>` : ""}
       ${canAdd ? html`<div class="note general">${localize("add_help")}</div>` : ""}
       ${!canAdd && !this.selected?.manual && this.selected?.entity_id ? html`
@@ -594,15 +595,43 @@ export class IhcPropertiesElement extends LitElement {
   // a row with a single paragraph under all of them, and the reader was left
   // to work out which sentence belonged to which button.
   addAction(dialog: string, platform: string) {
-    const writes = platform === "light" || platform === "switch";
-    const marked = writes && this.isInput();
+    // Turning on an on/off input tells the controller the button was pressed.
+    // A light level is an input too, but it is set rather than pressed.
+    const writes = (platform === "light" || platform === "switch")
+      && this.isInput() && this.selected?.type === "bool";
+    const suggested = this.suggestion();
+    const grey = suggested ? platform !== suggested : writes;
     return html`
       <div class="action">
-        <button class="${marked ? "writes" : ""}"
+        <button class="${grey ? "other" : ""}"
           @click=${() => { this.showDialog(dialog) }}>${platformLabel(platform)}</button>
         <div class="note">${localize(`add_${platform}_help`)}</div>
-        ${marked ? html`<div class="note">${localize("add_writes_input")}</div>` : ""}
+        ${writes ? html`<div class="note">${localize("add_writes_input")}</div>` : ""}
       </div>`;
+  }
+
+  // The platform left in colour: what the resource most likely is, from the
+  // product it sits on - see suggestPlatform. Only one it can be added as, and
+  // "" when there is nothing to go on, so the buttons stay as they were.
+  suggestion(): string {
+    const data: any = this.selectednode?.data;
+    const suggested = suggestPlatform(
+      this.selected?.type, !!data?.IsLightLevel, data?.Product, this.isInput());
+    const offered = {
+      binary_sensor: this.action_binary_sensor,
+      light: this.action_light,
+      sensor: this.action_sensor,
+      switch: this.action_switch,
+    };
+    return offered[suggested] ? suggested : "";
+  }
+
+  // Why that one - said under the buttons, so the colour is not a mystery
+  suggestionReason(): string {
+    const data: any = this.selectednode?.data;
+    return data?.IsLightLevel
+      ? localize("suggest_light_level")
+      : localize("suggest_product", data?.Product?.Name);
   }
 
   renderValueActions() {
@@ -639,9 +668,6 @@ export class IhcPropertiesElement extends LitElement {
     return this.selectednode?.data instanceof IHCInput;
   }
 
-  // One of the buttons that adds the resource to Home Assistant. A platform
-  // that writes to the controller is marked when the resource is an input -
-  // there, turning it on means telling the controller the button was pressed.
   onClose() {
     this.dispatchEvent(new CustomEvent("closeproperties", {
       bubbles: true, composed: true,
