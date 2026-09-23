@@ -22,6 +22,7 @@ class ApiGetResource(ApiBase):
         """Get a ihc resource from a ihc id."""
         id = int(id)
         self.initialize(controllerid)
+        await IhcMapper.get_mapping(self.hass, controllerid)
         value = await self.hass.async_add_executor_job(
             self.ihc_controller.get_runtime_value, id
         )
@@ -47,5 +48,6 @@ class ApiGetResource(ApiBase):
             "entity_id": entity_id,
             "manual": manual,
             "state": state,
+            "pending_removal": IhcMapper.ispendingremoval(controllerid, id),
         }
         return self.json(json)

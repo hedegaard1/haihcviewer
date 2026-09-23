@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>IHC Viewer preview</title>
+  <!-- The material icons ha-icon would give us inside Home Assistant -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+  <style>
+    /* A few of the theme variables Home Assistant sets, so the panel looks
+       here roughly like it does there. Not all of them - just the ones the
+       panel actually reads. */
+    :root {
+      --primary-color: #03a9f4;
+      --dark-primary-color: #0288d1;
+      --light-primary-color: #b3e5fc;
+      --primary-text-color: #212121;
+      --secondary-text-color: #727272;
+      --text-primary-color: #ffffff;
+      --disabled-text-color: #bdbdbd;
+      --divider-color: rgba(0, 0, 0, .12);
+      --error-color: #db4437;
+      --primary-background-color: #fafafa;
+      --secondary-background-color: #e5e5e5;
+      --card-background-color: #ffffff;
+      --app-header-background-color: var(--primary-color);
+      --app-header-text-color: var(--text-primary-color);
+      --header-height: 56px;
+      --ha-card-border-radius: 12px;
+      --ha-card-box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, .2),
+        0px 1px 1px 0px rgba(0, 0, 0, .14),
+        0px 1px 3px 0px rgba(0, 0, 0, .12);
+      --mdc-theme-primary: var(--primary-color);
+      --mdc-theme-on-primary: #ffffff;
+      --scrollbar-thumb-color: rgb(194, 194, 194);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: var(--primary-background-color);
+      color: var(--primary-text-color);
+      font-family: Roboto, Noto, sans-serif;
+    }
+
+    /* Home Assistant's own sidebar takes this much on the left, and the panel
+       is given the rest - with no height of its own. That last part matters:
+       it is why height:100% inside the panel resolves to auto. */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 56px;
+      background: var(--card-background-color);
+      border-right: 1px solid var(--divider-color);
+      z-index: 10;
+    }
+
+    #app-content {
+      padding-left: 56px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="sidebar"></div>
+  <div id="app-content"></div>
+
+  <script>
+    // ---- ha-icon ------------------------------------------------------
+    // Inside Home Assistant this is a real element from its frontend. Here it
+    // is the material icon font, which draws the same icons.
+    //
+    // It needs its own shadow root with its own copy of the stylesheet: the
+    // page's stylesheets do not reach into a shadow tree, and ha-icon is used
+    // inside the panel's. Without this the icons are simply blank.
+    const MDI_CSS =
+      "https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css";
+    class HaIconPreview extends HTMLElement {
+      static get observedAttributes() { return ["icon"]; }
+      connectedCallback() { this.render(); }
+      attributeChangedCallback() { this.render(); }
+      set icon(value) { this.setAttribute("icon", value); }
+      get icon() { return this.getAttribute("icon"); }
+      render() {
+        const name = (this.getAttribute("icon") || "").replace(/^mdi:/, "");
+        if (!this.shadowRoot) this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML =
+          `<link rel="stylesheet" href="${MDI_CSS}">` +
+          `<span class="mdi mdi-${name}" style="font-size:var(--mdc-icon-size,24px);` +
+          `line-height:1;display:inline-block;color:inherit"></span>`;
+      }
+    }
+    customElements.define("ha-icon", HaIconPreview);
+
+    // ---- ha-icon-picker ----------------------------------------------
+    // Inside Home Assistant this is the real picker with every icon and a
+    // search field, and it is registered when a card editor is loaded. The
+    // panel asks for it the way custom cards do - through loadCardHelpers and
+    // a built-in card's getConfigElement - so both are stubbed here to check
+    // that the path is taken and that the chosen value comes back.
+    //
+    // ?nopicker=1 leaves them out, so the fallback field can be seen too.
+    if (!new URLSearchParams(location.search).has("nopicker")) {
+      class HaIconPickerPreview extends HTMLElement {
+        set value(v) { this._value = v; this.render(); }
+        get value() { return this._value || ""; }
+        connectedCallback() { this.render(); }
+        render() {
+          if (!this.shadowRoot) {
+            this.attachShadow({ mode: "open" });
+            this.shadowRoot.innerHTML =
+              `<input style="width:100%;box-sizing:border-box" placeholder="(preview) ha-icon-picker">`;
+            this.shadowRoot.querySelector("input").addEventListener("input", (e) => {
+              this._value = e.target.value;
+              this.dispatchEvent(new CustomEvent("value-changed", {
+                detail: { value: this._value }, bubbles: true, composed: true,
+              }));
+            });
+          }
+          this.shadowRoot.querySelector("input").value = this.value;
+        }
+      }
+      window.loadCardHelpers = async () => ({
+        createCardElement: async () => {
+          // Plain class on purpose: a real card element cannot be constructed
+          // with new() unless it is registered, and the panel only looks at
+          // the constructor's getConfigElement.
+          class FakeCard {
+            static async getConfigElement() {
+              if (!customElements.get("ha-icon-picker")) {
+                customElements.define("ha-icon-picker", HaIconPickerPreview);
+              }
+              return document.createElement("div");
+            }
+          }
+          return new FakeCard();
+        },
+      });
+    }
+
+    // ---- the answers the panel would get from Home Assistant ----------
+    const CONTROLLER = "VN0000000000";
+
+    const MAPPING = {
+      // a couple of resources pretending to be entities already. The name is
+      // what the properties pane shows in the display name field - in Home
+      // Assistant it is the state's friendly_name.
+      4099: { entity_id: "light.kitchen_ceiling", manual: false, name: "Kitchen ceiling" },
+      4114: { entity_id: "binary_sensor.kitchen_button", manual: true, name: "Kitchen button" },
+    };
+
+    const SYSTEMINFO = {
+      uptime: "918273645",
+      brand: "LK",
+      hw_revision: "7.1",
+      led_dimmer_software_version: "1.0.0",
+      production_date: "2022-06-26",
+      serial_number: "VN0000000000",
+      sw_date: "2025-01-02",
+      version: "3.3.44",
+    };
+
+    const PROJECTINFO = {
+      projectMajorRevision: 4,
+      projectMinorRevision: 1,
+      lastmodified: "2026-01-02T09:15:00",
+      projectNumber: 1,
+      customerName: "",
+      installerName: "",
+    };
+
+    const GROUPICONS = {};
+
+    const ENTITY_ID = new RegExp("^[a-z_]+[.][a-z0-9_]+$");
+    const realFetch = window.fetch.bind(window);
+    window.fetch = async (url, init) => {
+      const path = String(url);
+      const json = (o) =>
+        new Response(JSON.stringify(o), {
+          status: 200, headers: { "content-type": "application/json" },
+        });
+      // The icons picked for the rooms. Kept in memory here, so picking one
+      // and clearing it again can be tried out - it is gone on reload.
+      if (path.includes("/api/ihcviewer/groupicons/")) {
+        if (init && init.method === "POST") {
+          const body = JSON.parse(init.body);
+          const icon = (body.icon || "").trim();
+          if (icon) GROUPICONS[body.id] = icon;
+          else delete GROUPICONS[body.id];
+        }
+        return json(GROUPICONS);
+      }
+      // Adding and removing a manual setup, answered the way the api does:
+      // the change is put into effect in the same call, so it takes a moment
+      // and comes back with the entity it became. ?failreload makes every
+      // reload fail, to see what the panel does then.
+      const failReload = new URLSearchParams(location.search).has("failreload");
+      const PLACEHOLDER = "not created yet. Reload the ihc integration.";
+      const pause = () => new Promise((r) => setTimeout(r, 1500));
+      if (path.includes("/api/ihcviewer/manual/remove/")) {
+        await pause();
+        const id = Number(path.split("/").pop());
+        const removed = MAPPING[id]?.entity_id || null;
+        delete MAPPING[id];
+        return json({ reloaded: !failReload, entity_id: null, removed });
+      }
+      if (path.includes("/api/ihcviewer/manual/")) {
+        await pause();
+        const body = JSON.parse(init.body);
+        if (MAPPING[body.id]) {
+          return new Response(JSON.stringify({ error: "add_already_set_up" }), {
+            status: 400, headers: { "content-type": "application/json" },
+          });
+        }
+        const platform = path.split("/manual/")[1].split("/")[0]
+          .replace("binarysensor", "binary_sensor");
+        const slug = `${body.name || ""}`.toLowerCase()
+          .normalize("NFD").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+        const entity_id = failReload ? PLACEHOLDER : `${platform}.${slug}`;
+        MAPPING[body.id] = { entity_id, manual: true, name: body.name };
+        if (failReload) MAPPING[body.id].changed = true;
+        return json({ reloaded: !failReload, entity_id: failReload ? null : entity_id });
+      }
+      // The button for trying again, when putting a change into effect failed
+      if (path.includes("/api/ihcviewer/reload/")) {
+        await pause();
+        for (const [id, m] of Object.entries(MAPPING)) {
+          if (m.entity_id === PLACEHOLDER) m.entity_id = `binary_sensor.preview_${id}`;
+          delete m.changed;
+        }
+        return json({ reloaded: true });
+      }
+      if (path.includes("/api/ihcviewer/projectinfo/")) return json(PROJECTINFO);
+      if (path.includes("/api/ihcviewer/systeminfo/")) return json(SYSTEMINFO);
+      if (path.includes("/api/ihcviewer/mapping/")) return json(MAPPING);
+      if (path.includes("/api/ihcviewer/log/"))
+        return new Response("Preview - no controller log", { status: 200 });
+      // Renaming the entity. The real one goes through Home Assistant's
+      // entity registry; here it is enough to move the name around and to
+      // answer with the same errors, so the messages can be read.
+      if (path.includes("/api/ihcviewer/entity/")) {
+        const body = JSON.parse(init.body);
+        const entry = Object.values(MAPPING).find(
+          (m) => m.entity_id === body.entity_id);
+        const refuse = (key) => new Response(JSON.stringify({ error: key }), {
+          status: 400, headers: { "content-type": "application/json" },
+        });
+        if (!entry) return refuse("rename_not_in_registry");
+        if (body.new_entity_id) {
+          const wanted = body.new_entity_id;
+          if (!ENTITY_ID.test(wanted)) return refuse("rename_id_invalid");
+          if (wanted.split(".")[0] !== entry.entity_id.split(".")[0])
+            return refuse("rename_id_domain");
+          if (Object.values(MAPPING).some((m) => m.entity_id === wanted))
+            return refuse("rename_id_taken");
+          entry.entity_id = wanted;
+        }
+        if ("name" in body) entry.name = body.name;
+        return json({ entity_id: entry.entity_id, name: entry.name || null });
+      }
+      if (path.includes("/api/ihcviewer/getresource/")) {
+        const id = Number(path.split("/").pop());
+        const mapped = MAPPING[id];
+        const live = mapped && !mapped.removed;
+        return json({
+          id, value: false, type: "bool",
+          entity_id: live ? mapped.entity_id : "",
+          manual: mapped ? !!mapped.manual : false,
+          state: live ? { attributes: { friendly_name: mapped.name } } : null,
+          pending_removal: mapped ? !!mapped.removed : false,
+        });
+      }
+      if (path.includes("/api/ihcviewer/project/")) {
+        // Slow on purpose the first time, so the spinner can be looked at
+        await new Promise((r) => setTimeout(r, Number(
+          new URLSearchParams(location.search).get("delay") || 1200)));
+        return realFetch("./project.xml");
+      }
+      return realFetch(url, init);
+    };
+
+    // ---- the panel ----------------------------------------------------
+    // Through a fresh version prefix every time, so the browser cannot hand us
+    // a module it already has - see the note in server.py.
+    import(`/v${Date.now()}/custom_components/ihcviewer/frontend/panel.js`).then(() => {
+      const panel = document.createElement("ha-panel-ihcviewer");
+      panel.hass = {
+        connection: { options: { auth: { expired: false, accessToken: "preview" } } },
+        // Named, so the remove dialog can show what uses the kitchen button
+        states: {
+          "automation.kitchen_night": { attributes: { friendly_name: "Kitchen light at night" } },
+          "scene.evening": { attributes: { friendly_name: "Evening" } },
+        },
+        // What Home Assistant's websocket answers for the remove dialog: the
+        // kitchen button is used by an automation, a scene and the default
+        // dashboard. The second dashboard is drawn by Home Assistant itself
+        // and has no config. ?failsearch makes the lookup fail.
+        callWS: async (msg) => {
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          if (new URLSearchParams(location.search).has("failsearch")) throw new Error("preview");
+          if (msg.type === "search/related") {
+            return msg.item_id === "binary_sensor.kitchen_button"
+              ? { automation: ["automation.kitchen_night"], scene: ["scene.evening"],
+                  area: ["kitchen"], label: ["ihc"] }
+              : {};
+          }
+          if (msg.type === "lovelace/dashboards/list") {
+            return [{ url_path: "energy-overview", title: "Energy" }];
+          }
+          if (msg.type === "lovelace/config" && msg.url_path === null) {
+            return { views: [{ cards: [{ type: "tile", entity: "binary_sensor.kitchen_button" }] }] };
+          }
+          throw new Error("config_not_found");
+        },
+        themes: {},
+        locale: { language: new URLSearchParams(location.search).get("lang") || "en" },
+        // A few of Home Assistant's own names for the device classes, the way
+        // the real hass.localize hands them to the binary sensor dialog
+        localize: (key) => ({
+          "component.binary_sensor.entity_component.opening.name": "Åbner",
+          "component.binary_sensor.entity_component.occupancy.name": "Tilstedeværelse",
+          "component.binary_sensor.entity_component.presence.name": "Tilstedeværelse",
+          "component.binary_sensor.entity_component.power.name": "Strøm",
+        })[key] || "",
+        // ?lang=da, sv, nb, fi, et, lv, lt - the panel's own language
+        language: new URLSearchParams(location.search).get("lang") || "en",
+        // The user's own areas. A room in the ihc project that is named like
+        // one of these borrows its icon - Kitchen and Bedroom do, the other
+        // three rooms in the project fall back on the plain room icon.
+        areas: {
+          kitchen: { area_id: "kitchen", name: "Kitchen", icon: "mdi:countertop" },
+          bedroom: { area_id: "bedroom", name: "Bedroom", icon: "mdi:bed" },
+          garage: { area_id: "garage", name: "Garage", icon: "mdi:garage" },
+          living: { area_id: "living", name: "Living room", icon: null },
+        },
+      };
+      panel.narrow = false;
+      panel.panel = {
+        config: {
+          ihcviewer: [CONTROLLER],
+          version: "preview",
+          _panel_custom: { name: "ha-panel-ihcviewer" },
+        },
+      };
+      document.getElementById("app-content").appendChild(panel);
+    });
+  </script>
+</body>
+
+</html>

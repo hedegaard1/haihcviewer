@@ -1,0 +1,16 @@
+{
+    "config": {
+        "error": {
+            "unknown": "Tuntematon virhe",
+            "already_setup": "Tämä ohjain on jo määritetty",
+            "no_ihc": "IHC-integraatiota ei löytynyt",
+            "old_ihc": "Löytyi vanha IHC-integraatio. Sinun on päivitettävä IHC-integraatiosi"
+        },
+        "step": {
+            "user": {
+                "description": "Lisää IHC-ohjaimellesi katselin Home Assistantiin"
+            }
+        }
+    },
+    "title": "IHC Viewer"
+}

@@ -20,4 +20,4 @@ node_modules
 config/*
 !config/configuration.yaml
 custom_components/*
-!custom_components/ihcviewer/*
+!custom_components/ihcviewer/

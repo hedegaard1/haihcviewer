@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<utcs_project>
+  <groups>
+  <group id="_0x1003" name="Kitchen" note="Gruppe 1">
+    <product_dataline id="_0x1006" product_identifier="_0x2102" icon="_0x85" name="LK FUGA Tryk 4 tast" note="Note for lk fuga tryk 4 tast" position="LK FUGA Tryk 4 tast (Kitchen)" cablenumber="22">
+      <dataline_input id="_0x1009" name="Tryk 1"/>
+      <dataline_input id="_0x100c" name="Tryk 2"/>
+      <dataline_input id="_0x100f" name="Tryk 3"/>
+      <dataline_input id="_0x1012" name="Tryk 4"/>
+    </product_dataline>
+    <product_dataline id="_0x1015" product_identifier="_0x210f" icon="_0x83" name="PIR alarm" note="Note for pir alarm" position="PIR alarm (Kitchen)" cablenumber="37">
+      <dataline_input id="_0x1018" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x101b" product_identifier="_0x2115" icon="_0x83" name="Backup modul" note="Note for backup modul" position="Backup modul (Kitchen)" cablenumber="3">
+      <dataline_input id="_0x101e" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x1021" product_identifier="_0x9999" icon="_0x85" name="Ukendt produkttype" note="Note for ukendt produkttype" position="Ukendt produkttype (Kitchen)" cablenumber="9">
+      <dataline_input id="_0x1024" name="Tryk 1"/>
+    </product_dataline>
+    <product_airlink id="_0x1027" product_identifier="_0x4102" icon="_0x85" name="Tryk 4 tast" note="Note for tryk 4 tast" position="Tryk 4 tast (Kitchen)" cablenumber="15">
+      <airlink_input id="_0x102a" name="Tryk 1"/>
+      <airlink_input id="_0x102d" name="Tryk 2"/>
+      <airlink_input id="_0x1030" name="Tryk 3"/>
+      <airlink_input id="_0x1033" name="Tryk 4"/>
+    </product_airlink>
+    <functionblock id="_0x1036" name="1.1.01. Kip blok" note="Generel funktionsblok">
+      <inputs>
+        <resource_input id="_0x1039" name="KIP"/>
+        <resource_input id="_0x103c" name="Taend"/>
+        <resource_input id="_0x103f" name="Sluk"/>
+      </inputs>
+      <outputs>
+        <resource_output id="_0x1042" name="Udgang for lys"/>
+        <resource_output id="_0x1045" name="ON puls"/>
+      </outputs>
+    </functionblock>
+  </group>
+  <group id="_0x1048" name="Living room" note="Gruppe 2">
+    <product_dataline id="_0x104b" product_identifier="_0x2103" icon="_0x85" name="LK FUGA Tryk 6 tast" note="Note for lk fuga tryk 6 tast" position="LK FUGA Tryk 6 tast (Living room)" cablenumber="11">
+      <dataline_input id="_0x104e" name="Tryk 1"/>
+      <dataline_input id="_0x1051" name="Tryk 2"/>
+      <dataline_input id="_0x1054" name="Tryk 3"/>
+      <dataline_input id="_0x1057" name="Tryk 4"/>
+      <dataline_input id="_0x105a" name="Tryk 5"/>
+      <dataline_input id="_0x105d" name="Tryk 6"/>
+    </product_dataline>
+    <product_dataline id="_0x1060" product_identifier="_0x2110" icon="_0x83" name="Skumringsrelae" note="Note for skumringsrelae" position="Skumringsrelae (Living room)" cablenumber="32">
+      <dataline_input id="_0x1063" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x1066" product_identifier="_0x2201" icon="_0x88" name="Stikkontakt" note="Note for stikkontakt" position="Stikkontakt (Living room)" cablenumber="38">
+      <dataline_output id="_0x1069" name="Udgang"/>
+    </product_dataline>
+    <product_airlink id="_0x106c" product_identifier="_0x4103" icon="_0x85" name="Tryk 6 tast" note="Note for tryk 6 tast" position="Tryk 6 tast (Living room)" cablenumber="4">
+      <airlink_input id="_0x106f" name="Tryk 1"/>
+      <airlink_input id="_0x1072" name="Tryk 2"/>
+      <airlink_input id="_0x1075" name="Tryk 3"/>
+      <airlink_input id="_0x1078" name="Tryk 4"/>
+      <airlink_input id="_0x107b" name="Tryk 5"/>
+      <airlink_input id="_0x107e" name="Tryk 6"/>
+    </product_airlink>
+    <functionblock id="_0x1081" name="1.1.01. Kip blok" note="Generel funktionsblok">
+      <inputs>
+        <resource_input id="_0x1084" name="KIP"/>
+        <resource_input id="_0x1087" name="Taend"/>
+        <resource_input id="_0x108a" name="Sluk"/>
+      </inputs>
+      <outputs>
+        <resource_output id="_0x108d" name="Udgang for lys"/>
+        <resource_output id="_0x1090" name="ON puls"/>
+      </outputs>
+    </functionblock>
+  </group>
+  <group id="_0x1093" name="Bedroom" note="Gruppe 3">
+    <product_dataline id="_0x1096" product_identifier="_0x2108" icon="_0x85" name="LK FUGA Statustryk 4 tast 4 dioder" note="Note for lk fuga statustryk 4 tast 4 dioder" position="LK FUGA Statustryk 4 tast 4 dioder (Bedroom)" cablenumber="6">
+      <dataline_input id="_0x1099" name="Tryk 1"/>
+      <dataline_input id="_0x109c" name="Tryk 2"/>
+      <dataline_input id="_0x109f" name="Tryk 3"/>
+      <dataline_input id="_0x10a2" name="Tryk 4"/>
+      <dataline_output id="_0x10a5" name="Udgang"/>
+      <dataline_output id="_0x10a8" name="Udgang"/>
+      <dataline_output id="_0x10ab" name="Udgang"/>
+      <dataline_output id="_0x10ae" name="Udgang"/>
+    </product_dataline>
+    <product_dataline id="_0x10b1" product_identifier="_0x2111" icon="_0x85" name="Kodetastatur" note="Note for kodetastatur" position="Kodetastatur (Bedroom)" cablenumber="33">
+      <dataline_input id="_0x10b4" name="Tryk 1"/>
+      <dataline_input id="_0x10b7" name="Tryk 2"/>
+      <dataline_output id="_0x10ba" name="Udgang"/>
+    </product_dataline>
+    <product_dataline id="_0x10bd" product_identifier="_0x2202" icon="_0x86" name="Lampeudtag" note="Note for lampeudtag" position="Lampeudtag (Bedroom)" cablenumber="5">
+      <dataline_output id="_0x10c0" name="Udgang"/>
+    </product_dataline>
+    <functionblock id="_0x10c3" name="1.1.01. Kip blok" note="Generel funktionsblok">
+      <inputs>
+        <resource_input id="_0x10c6" name="KIP"/>
+        <resource_input id="_0x10c9" name="Taend"/>
+        <resource_input id="_0x10cc" name="Sluk"/>
+      </inputs>
+      <outputs>
+        <resource_output id="_0x10cf" name="Udgang for lys"/>
+        <resource_output id="_0x10d2" name="ON puls"/>
+      </outputs>
+    </functionblock>
+  </group>
+  <group id="_0x10d5" name="Hallway" note="Gruppe 4">
+    <product_dataline id="_0x10d8" product_identifier="_0x2109" icon="_0x83" name="Magnetkontaktsaet" note="Note for magnetkontaktsaet" position="Magnetkontaktsaet (Hallway)" cablenumber="32">
+      <dataline_input id="_0x10db" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x10de" product_identifier="_0x2112" icon="_0x83" name="Sabotagekreds" note="Note for sabotagekreds" position="Sabotagekreds (Hallway)" cablenumber="38">
+      <dataline_input id="_0x10e1" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x10e4" product_identifier="_0x2203" icon="_0x84" name="Lydgiver intern" note="Note for lydgiver intern" position="Lydgiver intern (Hallway)" cablenumber="4">
+      <dataline_output id="_0x10e7" name="Udgang"/>
+    </product_dataline>
+    <functionblock id="_0x10ea" name="1.1.01. Kip blok" note="Generel funktionsblok">
+      <inputs>
+        <resource_input id="_0x10ed" name="KIP"/>
+        <resource_input id="_0x10f0" name="Taend"/>
+        <resource_input id="_0x10f3" name="Sluk"/>
+      </inputs>
+      <outputs>
+        <resource_output id="_0x10f6" name="Udgang for lys"/>
+        <resource_output id="_0x10f9" name="ON puls"/>
+      </outputs>
+    </functionblock>
+  </group>
+  <group id="_0x10fc" name="Outdoor" note="Gruppe 5">
+    <product_dataline id="_0x10ff" product_identifier="_0x210e" icon="_0x83" name="PIR" note="Note for pir" position="PIR (Outdoor)" cablenumber="31">
+      <dataline_input id="_0x1102" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x1105" product_identifier="_0x2113" icon="_0x85" name="Ringetryk" note="Note for ringetryk" position="Ringetryk (Outdoor)" cablenumber="37">
+      <dataline_input id="_0x1108" name="Tryk 1"/>
+    </product_dataline>
+    <product_dataline id="_0x110b" product_identifier="_0x4304" icon="_0x86" name="Lampeudtag dimmer" note="Note for lampeudtag dimmer" position="Lampeudtag dimmer (Outdoor)" cablenumber="3">
+      <dataline_output id="_0x110e" name="Udgang"/>
+    </product_dataline>
+    <functionblock id="_0x1111" name="1.1.01. Kip blok" note="Generel funktionsblok">
+      <inputs>
+        <resource_input id="_0x1114" name="KIP"/>
+        <resource_input id="_0x1117" name="Taend"/>
+        <resource_input id="_0x111a" name="Sluk"/>
+      </inputs>
+      <outputs>
+        <resource_output id="_0x111d" name="Udgang for lys"/>
+        <resource_output id="_0x1120" name="ON puls"/>
+      </outputs>
+    </functionblock>
+  </group>
+  </groups>
+</utcs_project>

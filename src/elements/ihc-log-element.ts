@@ -1,5 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { IHCManager } from "../ihcmanager";
+import { localize } from "../localize";
 import { LitElement, css, html } from 'lit';
 
 require("./loader-element");
@@ -30,7 +31,7 @@ export class IhcLogElement extends LitElement {
     return html`
       <div id="log">
         ${this.isLogLoading ? html`<ihc-loader/>` : ""}
-        <pre id="ihc_log">${this.log == "" ? "No log data" : this.log}</pre>
+        <pre id="ihc_log">${this.log == "" ? localize("no_log_data") : this.log}</pre>
       </div>
     `;
   }
@@ -53,7 +54,7 @@ export class IhcLogElement extends LitElement {
       if (response.ok) {
         let txt = await response.text();
         if (txt == "") {
-          this.log = "Log is empty";
+          this.log = localize("log_is_empty");
         } else {
           this.log = txt;
         }
