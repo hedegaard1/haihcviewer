@@ -1,36 +1,43 @@
-"""Statisk server til forhaandsvisningen - uden cache.
+"""Static server for the preview - without a cache.
 
-python -m http.server saetter ingen Cache-Control, og browseren gaetter saa selv
-hvor laenge en fil holder. Det gjorde at et genbygget element-tree.js blev ved
-med at komme fra cachen, mens resten var nyt - praecis den samme faelde som paa
-Home Assistant. Her er svaret no-store, saa hver genindlaesning henter alt.
+    npm run buildprod
+    python preview/server.py            (then open http://localhost:8777/preview/)
 
-no-store er ikke nok til ES-moduler. Browseren holder fast i det modul den
-allerede har hentet for en given URL, ogsaa efter en haard genindlaesning, og
-saa koerte forhaandsvisningen videre paa en gammel udgave af et enkelt element
-mens resten var nyt - en klasse med engelske tekster i, selvom filen paa disken
-var oversat. Derfor sluger serveren et forled som /v1758537600/ og serverer
-resten som normalt: index.html henter panel.js gennem et nyt forled hver gang,
-og fordi webpack slaar sine egne stykker op i forhold til panel.js' egen URL,
-foelger de med af sig selv. Nye URL'er, nye moduler.
+The preview runs the built panel in a plain browser, against stand-ins for Home
+Assistant and the api in index.html and the made-up project in project.xml
+(written by make_project.py).
+
+python -m http.server sets no Cache-Control, and the browser then guesses by
+itself how long a file keeps. That made a rebuilt element-tree.js keep coming
+from the cache while the rest was new - the very same trap as on Home
+Assistant. Here the answer is no-store, so every reload fetches everything.
+
+no-store is not enough for ES modules. The browser holds on to a module it has
+already fetched for a given url, even across a hard reload, and then the
+preview ran on an old version of a single element while the rest was new - a
+class with English texts in it, although the file on disk was translated. So
+the server swallows a prefix like /v1758537600/ and serves the rest as usual:
+index.html fetches panel.js through a new prefix every time, and because
+webpack looks up its own chunks relative to panel.js' own url, they follow by
+themselves. New urls, new modules.
 """
 import http.server
 import re
 import sys
 
-MAPPE = sys.argv[2] if len(sys.argv) > 2 else "."
+FOLDER = sys.argv[2] if len(sys.argv) > 2 else "."
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8777
 
 
-VERSIONSFORLED = re.compile(r"^/v\d+/")
+VERSION_PREFIX = re.compile(r"^/v\d+/")
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=MAPPE, **kwargs)
+        super().__init__(*args, directory=FOLDER, **kwargs)
 
     def translate_path(self, path):
-        return super().translate_path(VERSIONSFORLED.sub("/", path))
+        return super().translate_path(VERSION_PREFIX.sub("/", path))
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store, max-age=0")
@@ -41,5 +48,5 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"forhaandsvisning paa http://localhost:{PORT}/preview/ fra {MAPPE}")
+    print(f"preview on http://localhost:{PORT}/preview/ from {FOLDER}")
     http.server.ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
