@@ -391,14 +391,16 @@ export class IhcControllerElement extends LitElement {
   }
 
   // Everything about the controller in one card: what it is, which project it
-  // runs, the tabs, and the buttons the panel hands down through the slot.
+  // runs, the tabs, and the buttons the panel hands down through the slot. The
+  // icon is IHC Viewer's own, the same as in the sidebar - it comes from the
+  // icon set in custom_components/ihcviewer/icons/ihcviewer-icons.js.
   render_controllercard() {
     const system = this.systemInfo;
     const project = this.projectInfo;
     return html`
       <div id="controllercard">
         <div id="cardtop">
-          <ha-icon icon="mdi:chip"></ha-icon>
+          <ha-icon icon="ihcviewer:logo"></ha-icon>
           <div id="cardtext">
             <div class="title">IHC Viewer</div>
             <div id="facts">

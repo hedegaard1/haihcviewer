@@ -308,7 +308,7 @@ export const __webpack_esm_id__=394;export const __webpack_esm_ids__=[394];expor
     `}render_controllercard(){const e=this.systemInfo,t=this.projectInfo;return c.qy`
       <div id="controllercard">
         <div id="cardtop">
-          <ha-icon icon="mdi:chip"></ha-icon>
+          <ha-icon icon="ihcviewer:logo"></ha-icon>
           <div id="cardtext">
             <div class="title">IHC Viewer</div>
             <div id="facts">
