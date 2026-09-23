@@ -17,5 +17,6 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/dingusdk/haihcviewer",
-  "version": "2026.2.0"
+  "issue_tracker": "https://github.com/hedegaard1/haihcviewer/issues",
+  "version": "2026.9.0"
 }
