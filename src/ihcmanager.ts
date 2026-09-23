@@ -1,4 +1,5 @@
 import { IHCProject } from "./ihcproject";
+import { keepProject, revisionOf } from "./logic";
 
 /*
 IHCManager is a singleton. use IHCManager.instance
@@ -78,19 +79,14 @@ class IHCController {
   // it from the controller takes a while - well over a megabyte of xml. So
   // first we ask the controller which project it is running, which is a small
   // request, and only read the whole thing again when that is not the one we
-  // are holding. Pass refresh to read it again regardless.
-  async getProject(refresh = false): Promise<IHCProject> {
+  // are holding - see keepProject.
+  async getProject(): Promise<IHCProject> {
 
     let revision = await this.getProjectRevision();
-    // Keep what we have when the controller reports the same project, and also
-    // when it does not answer at all: reading a megabyte of xml again because
-    // one small request failed would be the wrong trade.
-    if (this.project != null && !refresh &&
-      (revision == null || revision == this.projectRevision)) {
+    if (keepProject(this.project != null, this.projectRevision, revision)) {
       return this.project;
     }
     let url = `/api/ihcviewer/project/${this.controllerId}`;
-    if (refresh) url += "?refresh=true";
     let response = await IHCManager.instance.fetchWithAuth(url);
     if (!response.ok) {
       throw new Error(`Could not read the ihc project (${response.status} ${response.statusText})`);
@@ -105,7 +101,8 @@ class IHCController {
 
   // Which project the controller is running, as one string to compare on.
   // Null when it cannot be read, so a failure here never throws away a project
-  // we already have. What came back is kept so the panel can show it.
+  // we already have, and "" when the controller reports none. What came back is
+  // kept so the panel can show it.
   private async getProjectRevision(): Promise<string> {
     let response = await IHCManager.instance.fetchWithAuth(
       `/api/ihcviewer/projectinfo/${this.controllerId}`);
@@ -115,7 +112,7 @@ class IHCController {
     }
     let info = await response.json();
     this.projectInfo = info;
-    return `${info.projectMajorRevision}.${info.projectMinorRevision}.${info.lastmodified}`;
+    return revisionOf(info);
   }
 
   // What the controller says about itself. Read once - it is the hardware,

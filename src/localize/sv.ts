@@ -9,8 +9,6 @@ export const sv: { [key: string]: string } = {
 
   tab_project: "Projekt",
   tab_log: "Logg",
-  reload_project: "Läs om projektet",
-  reload_project_title: "Läs projektet från ihc-styrenheten igen. Det sker av sig självt när styrenheten rapporterar ett nytt projekt, så den här behövs bara om den inte rapporterar någon revision alls.",
   filter_search_placeholder: "Sök i namn, entitet eller ihc-id",
   filter_all_products: "Alla produkttyper",
   filter_count: "{0} av {1}",

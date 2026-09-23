@@ -15,6 +15,14 @@ _LOGGER = logging.getLogger(__name__)
 REVISION_KEYS = ("projectMajorRevision", "projectMinorRevision", "lastmodified")
 
 
+def serve_cached(cached, revision):
+    """Whether the kept project is still the one the controller runs.
+
+    A controller that does not report a revision gives None, and then there is
+    nothing to tell an old project from a new one, so it is read every time."""
+    return cached is not None and revision is not None and cached["revision"] == revision
+
+
 class ApiProject(ApiBase):
     """IHCViewer api project requests.
 
@@ -34,10 +42,7 @@ class ApiProject(ApiBase):
         projects = self.hass.data.setdefault(DATA_PROJECT, {})
         cached = projects.get(controllerid)
         revision = await self.hass.async_add_executor_job(self.get_revision)
-        forced = request.query.get("refresh") == "true"
-        # A controller that does not report a revision gives None, and then the
-        # cache is kept until someone asks for a refresh.
-        if cached is not None and not forced and cached["revision"] == revision:
+        if serve_cached(cached, revision):
             return self.project_response(cached["project"])
         project = await self.hass.async_add_executor_job(self.read_project)
         if not project:
@@ -69,7 +74,7 @@ class ApiProject(ApiBase):
         _project is private to the sdk, so a new version may call it something
         else. Then the kept project comes back, and a new one only shows once
         the ihc integration is reloaded - the log says so, rather than leaving
-        "Reload project" to quietly do nothing."""
+        the panel to quietly show the old one."""
         if hasattr(self.ihc_controller, "_project"):
             self.ihc_controller._project = None  # noqa: SLF001
         else:

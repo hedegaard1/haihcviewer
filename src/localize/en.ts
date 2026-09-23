@@ -12,8 +12,6 @@ export const en: { [key: string]: string } = {
   // the controller card and its tabs
   tab_project: "Project",
   tab_log: "Log",
-  reload_project: "Reload project",
-  reload_project_title: "Read the project from the ihc controller again. It is read again by itself when the controller reports a new one, so this is only needed if it reports no revision at all.",
   filter_search_placeholder: "Search name, entity or ihc id",
   filter_all_products: "All product types",
   filter_count: "{0} of {1}",

@@ -132,6 +132,26 @@ export function filterGroups(groups, text: string, product: string): number {
   return hits;
 }
 
+// Which project a controller is running, as one string to compare on, from
+// what getProjectInfo returned. "" when it reports no revision at all - then
+// there is nothing to tell an old project from a new one.
+export function revisionOf(info): string {
+  const parts = ["projectMajorRevision", "projectMinorRevision", "lastmodified"]
+    .map((key) => info?.[key]);
+  return parts.every((part) => part == null) ? "" : parts.join(".");
+}
+
+// Whether the project the panel holds can be shown again without reading it.
+// revision is null when the controller could not be asked, and then the held
+// one is kept: reading a megabyte of xml again because one small request
+// failed would be the wrong trade. A controller that reports no revision ("")
+// is read every time, the way the panel always read it before it kept it.
+export function keepProject(held: boolean, heldRevision: string, revision: string): boolean {
+  if (!held) return false;
+  if (revision == null) return true;
+  return revision !== "" && revision === heldRevision;
+}
+
 // What an output on each product type most likely is in Home Assistant. The
 // identifiers and names are the ones in icons.ts. A type that is not here goes
 // by its ihc icon number instead, and one with neither gets no suggestion.

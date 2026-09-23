@@ -9,8 +9,6 @@ export const nb: { [key: string]: string } = {
 
   tab_project: "Prosjekt",
   tab_log: "Logg",
-  reload_project: "Last prosjektet på nytt",
-  reload_project_title: "Les prosjektet fra ihc-kontrolleren på nytt. Det skjer av seg selv når kontrolleren melder et nytt prosjekt, så denne trengs bare hvis den ikke melder en revisjon i det hele tatt.",
   filter_search_placeholder: "Søk i navn, entitet eller ihc-id",
   filter_all_products: "Alle produkttyper",
   filter_count: "{0} av {1}",
