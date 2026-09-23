@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.components.frontend import (
+    add_extra_js_url,
     async_register_built_in_panel,
     async_remove_panel,
 )
@@ -23,6 +24,8 @@ from .const import (
     DATA_VERSION,
     DOMAIN,
     NAME_SHORT,
+    SIDEBAR_ICON,
+    URL_ICONS,
     URL_PANEL,
 )
 
@@ -131,7 +134,7 @@ def add_side_panel(hass):
         component_name="custom",
         frontend_url_path=URL_PANEL,
         sidebar_title=NAME_SHORT,
-        sidebar_icon="mdi:file-tree",
+        sidebar_icon=SIDEBAR_ICON,
         config=panelconf,
         require_admin=True,
     )
@@ -179,4 +182,12 @@ async def async_register_frontend(hass):
             )
             for filename in served
         ]
+        + [
+            # The sidebar icon, at a fixed address and cached - the one file
+            # that is. See icons/ihcviewer-icons.js for why.
+            StaticPathConfig(
+                URL_ICONS, os.path.join(os.path.dirname(__file__), "icons"), True
+            )
+        ]
     )
+    add_extra_js_url(hass, f"{URL_ICONS}/ihcviewer-icons.js")
