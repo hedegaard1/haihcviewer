@@ -60,7 +60,6 @@ def _stand_ins():
     _module("homeassistant.helpers")
     _module("homeassistant.helpers.entity_registry")
     _module("homeassistant.components")
-    _module("homeassistant.components.ihc", IHC_CONTROLLER="controller")
     _module("homeassistant.components.http", HomeAssistantView=object)
     # The yaml library is only used to read the file, and the tests hand the
     # parsed file in directly
