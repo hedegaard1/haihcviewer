@@ -1,0 +1,16 @@
+{
+    "config": {
+        "error": {
+            "unknown": "Nezināma kļūda",
+            "already_setup": "Šis kontrolleris jau ir konfigurēts",
+            "no_ihc": "IHC integrācija nav atrasta",
+            "old_ihc": "Atrasta veca IHC integrācija. Jums ir jāatjaunina IHC integrācija"
+        },
+        "step": {
+            "user": {
+                "description": "Pievienojiet Home Assistant savam IHC kontrollerim skatītāju"
+            }
+        }
+    },
+    "title": "IHC Viewer"
+}

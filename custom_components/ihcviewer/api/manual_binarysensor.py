@@ -7,8 +7,14 @@ from http import HTTPStatus
 from homeassistant.core import callback
 
 from .apibase import ApiBase
+from .change import put_into_effect
 from .mapper import IhcMapper
-from .yamlhelper import get_controller_conf, read_manual_setup, write_manual_setup
+from .yamlhelper import (
+    find_manual_platform,
+    get_controller_conf,
+    read_manual_setup,
+    write_manual_setup,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +29,7 @@ class ApiManualBinarySensor(ApiBase):
     async def post(self, request, controllerid):
         """handle api post requests"""
         self.initialize(controllerid)
+        await IhcMapper.get_mapping(self.hass, controllerid)
         body = await request.text()
         data = json.loads(body) if body else None
         if data is None or not isinstance(data, dict):
@@ -33,18 +40,28 @@ class ApiManualBinarySensor(ApiBase):
         name = data.get("name")
         type = data.get("type")
         inverting = data.get("inverted")
+        error = await self.hass.async_add_executor_job(
+            self.make_binary_sensor, controllerid, id, name, type, inverting
+        )
+        if error:
+            return self.error(error)
+        # The change is put into Home Assistant here and now, so there is
+        # nothing left to press - and no restart
         return self.json(
-            await self.hass.async_add_executor_job(
-                self.make_binary_sensor, controllerid, id, name, type, inverting
-            )
+            await put_into_effect(self.hass, controllerid, id, "binary_sensor")
         )
 
     def make_binary_sensor(
         self, controller_id: str, id: int, name: str, type: str, inverting: bool
     ):
         """Make a new binary sensor."""
-        if IhcMapper.ismapped(controller_id, id):
-            raise Exception("IHC resource id already added")
+        # Refused with a key the panel says in the user's own language. This
+        # used to raise, which reached the panel as a bare 500 that it showed
+        # nothing about - the click simply seemed to do nothing.
+        if find_manual_platform(self.hass, controller_id, id) or IhcMapper.ismapped(
+            controller_id, id
+        ):
+            return "add_already_set_up"
 
         conf = read_manual_setup(self.hass)
         controller_conf = get_controller_conf(conf, controller_id)
@@ -57,5 +74,5 @@ class ApiManualBinarySensor(ApiBase):
             controller_conf["binary_sensor"] = [binary_sensor]
         else:
             controller_conf["binary_sensor"].append(binary_sensor)
-        IhcMapper.set(controller_id, id, "not loaded yet. HA restart required.", True)
+        IhcMapper.set(controller_id, id, "not created yet. Reload the ihc integration.", True)
         write_manual_setup(self.hass, conf)

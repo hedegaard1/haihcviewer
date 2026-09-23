@@ -1,6 +1,8 @@
 """ApiBase class"""
 import logging
 
+from http import HTTPStatus
+
 from homeassistant.components.http import HomeAssistantView
 from homeassistant.components.ihc import IHC_CONTROLLER
 
@@ -18,9 +20,20 @@ class ApiBase(HomeAssistantView):
         self.ihc_controller = None
 
     def initialize(self, controller_id):
-        """Initialize the view with the associated ihc controller"""
-        for entry_id, data in self.hass.data["ihc"].items():
+        """Initialize the view with the associated ihc controller.
+
+        The ihc integration takes itself out of hass.data while it is being
+        reloaded - and every change in the panel reloads it now - so a request
+        that arrives in those seconds must not fail on the lookup itself."""
+        for entry_id, data in self.hass.data.get("ihc", {}).items():
             if data['controller_id'] == controller_id:
                 self.ihc_controller = data['controller']
                 return
         _LOGGER.error("Controller %s not found.", controller_id)
+
+    def error(self, key: str):
+        """An error the panel can say in the user's own language.
+
+        The key is what the panel looks up - the message is only there for
+        whoever reads the response by hand."""
+        return self.json({"error": key, "message": key}, HTTPStatus.BAD_REQUEST)

@@ -1,6 +1,7 @@
 import { customElement, property } from 'lit/decorators.js';
 import { IhcResourceDialog } from "./ihc-resource-dlg"
 import { css, html } from 'lit';
+import { localize } from "../localize";
 
 @customElement("ihc-sensor-res-dlg")
 export class IhcSensorResourceDialog extends IhcResourceDialog {
@@ -10,7 +11,7 @@ export class IhcSensorResourceDialog extends IhcResourceDialog {
 
   constructor() {
     super();
-    this.title = "Add a sensor";
+    this.title = localize("dlg_sensor_title");
   }
 
   static get styles() {
@@ -22,9 +23,9 @@ export class IhcSensorResourceDialog extends IhcResourceDialog {
 
   render_controls() {
     return html`
-      <div class="controll-row">
-        <div>Unit of measurement (optional)</div>
-        <input id="unit" type="text" size="30" list="common-units"/>
+      <div class="control-row">
+        <div>${localize("dlg_unit")}</div>
+        <input id="unit" type="text" list="common-units"/>
         <datalist id="common-units">
           <option>%</option>
           <option>% RH</option>

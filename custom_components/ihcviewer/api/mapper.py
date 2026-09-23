@@ -1,6 +1,5 @@
 """IhcMapper class"""
 import logging
-from xmlrpc.client import Boolean
 from .yamlhelper import get_controller_conf, read_manual_setup
 from ..const import IHC_PLATFORMS
 
@@ -14,9 +13,41 @@ class IhcMapper:
     ihc_mapping = {}
 
     @staticmethod
-    def ismapped(controller_id, id) -> Boolean:
+    def ismapped(controller_id, id) -> bool:
         """Returns True if the specified ihc id is already mapped"""
-        return id in IhcMapper.ihc_mapping[controller_id]
+        mapping = IhcMapper.ihc_mapping.get(controller_id, {}).get(id)
+        return mapping is not None and not mapping.get("removed", False)
+
+    @staticmethod
+    def ispendingremoval(controller_id, id) -> bool:
+        """Returns True if the id has been removed but the entity is still there"""
+        mapping = IhcMapper.ihc_mapping.get(controller_id, {}).get(id)
+        return mapping is not None and mapping.get("removed", False)
+
+    @staticmethod
+    def markremoved(controller_id, id):
+        """Mark an ihc id as removed from the manual setup.
+
+        The entity is still there until the ihc integration has been reloaded,
+        but the id must be free again right away. Otherwise moving a resource
+        from one platform to another - say a button from switch to
+        binary_sensor - takes two restarts instead of one: the first one only
+        to make the id available again."""
+        mapping = IhcMapper.ihc_mapping.get(controller_id, {}).get(id)
+        if mapping is None:
+            return
+        mapping["removed"] = True
+        mapping["manual"] = False
+        mapping["changed"] = True
+
+    @staticmethod
+    def forget(controller_id):
+        """Forget the mapping for a controller.
+
+        Used after the ihc integration has been reloaded, where the entities
+        have been created from scratch. The mapping is rebuilt from the entity
+        states the next time it is asked for."""
+        IhcMapper.ihc_mapping.pop(controller_id, None)
 
     @staticmethod
     def get(controller_id, id):
@@ -28,24 +59,35 @@ class IhcMapper:
     @staticmethod
     def set(controller_id, id, entity_id, manual):
         """Set the mapping for a specified ihc id"""
-        IhcMapper.ihc_mapping[controller_id][id] = {
+        IhcMapper.ihc_mapping.setdefault(controller_id, {})[id] = {
             "entity_id": entity_id,
             "manual": manual,
             "changed": True,
         }
 
     @staticmethod
-    def haschanges() -> Boolean:
-        """Returns True if there are any changes in the mapping"""
-        for mapping in IhcMapper.ihc_mapping.values():
-            for entity in mapping:
-                if "changed" in entity:
-                    return True
-        return False
+    def rename(controller_id, id, entity_id):
+        """The entity for this ihc id has been given a new entity id.
+
+        The mapping is built from the entity states once and then kept, so
+        without this it would go on pointing at the name the entity had when
+        the panel was opened."""
+        if id is None:
+            return
+        mapping = IhcMapper.ihc_mapping.get(controller_id, {}).get(int(id))
+        if mapping is None:
+            return
+        mapping["entity_id"] = entity_id
 
     @staticmethod
     async def get_mapping(hass, controllerid):
-        """Return the mapping for the specified controller"""
+        """Return the mapping for the specified controller.
+
+        It is built from the entity states the first time it is asked for.
+        It does not survive a restart of Home Assistant, and forget() drops
+        it after the ihc integration has been reloaded - so anything that
+        wants to know whether an id is mapped has to ask for it here first
+        rather than assume it is there."""
         if controllerid in IhcMapper.ihc_mapping:
             return IhcMapper.ihc_mapping[controllerid]
 

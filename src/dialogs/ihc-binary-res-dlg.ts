@@ -1,6 +1,17 @@
 import { customElement, property } from 'lit/decorators.js';
 import { IhcResourceDialog } from "./ihc-resource-dlg"
 import { CSSResultGroup, css, html } from 'lit';
+import { localize } from "../localize";
+import { IHCManager } from "../ihcmanager";
+
+// The device classes a binary sensor can have, as the value that goes into
+// the manual setup
+const DEVICE_CLASSES = [
+  "battery", "battery_charging", "cold", "connectivity", "door", "garage_door",
+  "gas", "heat", "light", "lock", "moisture", "motion", "moving", "occupancy",
+  "opening", "plug", "power", "presence", "safety", "smoke", "sound",
+  "vibration", "window",
+];
 
 @customElement("ihc-binary-res-dlg")
 export class IhcBinaryResourceDialog extends IhcResourceDialog {
@@ -13,7 +24,7 @@ export class IhcBinaryResourceDialog extends IhcResourceDialog {
 
   constructor() {
     super();
-    this.title = "Add a binary sensor";
+    this.title = localize("dlg_binary_sensor_title");
   }
 
   static get styles() {
@@ -30,38 +41,34 @@ export class IhcBinaryResourceDialog extends IhcResourceDialog {
   render_controls() {
     return html`
       <div class="control-row">
-        <input id="inverted" type="checkbox"/><label for="inverted">Inverted</label>
+        <input id="inverted" type="checkbox"/><label for="inverted">${localize("dlg_inverted")}</label>
       </div>
       <div class="control-row">
-        <div>Type</div>
+        <div>${localize("dlg_type")}</div>
         <select id="type">
-          <option></option>
-          <option>battery</option>
-          <option>battery_charging</option>
-          <option>cold</option>
-          <option>connectivity</option>
-          <option>door</option>
-          <option>garage_door</option>
-          <option>gas</option>
-          <option>heat</option>
-          <option>light</option>
-          <option>lock</option>
-          <option>moisture</option>
-          <option>motion</option>
-          <option>moving</option>
-          <option>occupancy</option>
-          <option>opening</option>
-          <option>plug</option>
-          <option>power</option>
-          <option>presence</option>
-          <option>safety</option>
-          <option>smoke</option>
-          <option>sound</option>
-          <option>vibration</option>
-          <option>window</option>
+          <option value=""></option>
+          ${this.deviceClasses().map(({ deviceClass, label }) =>
+            html`<option value="${deviceClass}">${label}</option>`)}
         </select>
       </div>
     `;
+  }
+
+  // Each class in the user's own language, sorted by what the user reads.
+  // Home Assistant has the names already - the same ones it shows everywhere
+  // else - so the dialog borrows them rather than keeping eight lists of its
+  // own. They used to be the bare English values. The class itself stays in
+  // brackets: it is what goes into the manual setup, and in Danish occupancy
+  // and presence are both "Tilstedevaerelse".
+  deviceClasses() {
+    const hass = IHCManager.instance?.hass;
+    return DEVICE_CLASSES
+      .map((deviceClass) => {
+        const name = hass?.localize?.(
+          `component.binary_sensor.entity_component.${deviceClass}.name`);
+        return { deviceClass, label: name ? `${name} (${deviceClass})` : deviceClass };
+      })
+      .sort((a, b) => a.label.localeCompare(b.label, hass?.locale?.language));
   }
 
   async onOk() {

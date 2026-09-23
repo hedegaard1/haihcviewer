@@ -7,14 +7,21 @@ export class IHCManager {
 
   private _hass;
   private static theoneandonly;
-  private controllers: IHCController[];
+  private controllers: { [controllerId: string]: IHCController };
 
   private constructor(hass) {
     this._hass = hass;
-    this.controllers = [];
+    this.controllers = {};
   }
 
   static initialize(hass) {
+    // Keep the existing instance so the project we have already downloaded is
+    // reused when the panel is opened again. Only the hass object is refreshed,
+    // because the access token we authenticate with lives on it.
+    if (IHCManager.theoneandonly) {
+      IHCManager.theoneandonly._hass = hass;
+      return;
+    }
     IHCManager.theoneandonly = new IHCManager(hass)
   }
 
@@ -51,36 +58,119 @@ class IHCController {
 
   private controllerId: string;
   private project: IHCProject;
+  private projectRevision: string;
   private ihcmapping;
+  private groupIcons = null;
+  // What the controller last told us about the project it is running, and
+  // about itself. Both are shown in the panel.
+  public projectInfo = null;
+  public systemInfo = undefined;
 
   constructor(controllerId: string) {
 
     this.controllerId = controllerId;
     this.project = null;
+    this.projectRevision = null;
     this.ihcmapping = null;
   }
 
-  async getProject(): Promise<IHCProject> {
+  // Get the project. It is kept both here and on the server, because reading
+  // it from the controller takes a while - well over a megabyte of xml. So
+  // first we ask the controller which project it is running, which is a small
+  // request, and only read the whole thing again when that is not the one we
+  // are holding. Pass refresh to read it again regardless.
+  async getProject(refresh = false): Promise<IHCProject> {
 
-    if (this.project == null) {
-      let response = await IHCManager.instance.fetchWithAuth(`/api/ihcviewer/project/${this.controllerId}`);
-      if (response.ok) {
-        let projectdata = await response.text();
-        let xmlparser = new DOMParser();
-        let projectxml = xmlparser.parseFromString(projectdata, "text/xml");
-        this.project = new IHCProject(projectxml);
-      }
+    let revision = await this.getProjectRevision();
+    // Keep what we have when the controller reports the same project, and also
+    // when it does not answer at all: reading a megabyte of xml again because
+    // one small request failed would be the wrong trade.
+    if (this.project != null && !refresh &&
+      (revision == null || revision == this.projectRevision)) {
+      return this.project;
     }
+    let url = `/api/ihcviewer/project/${this.controllerId}`;
+    if (refresh) url += "?refresh=true";
+    let response = await IHCManager.instance.fetchWithAuth(url);
+    if (!response.ok) {
+      throw new Error(`Could not read the ihc project (${response.status} ${response.statusText})`);
+    }
+    let projectdata = await response.text();
+    let xmlparser = new DOMParser();
+    let projectxml = xmlparser.parseFromString(projectdata, "text/xml");
+    this.project = new IHCProject(projectxml);
+    this.projectRevision = revision;
     return this.project;
+  }
+
+  // Which project the controller is running, as one string to compare on.
+  // Null when it cannot be read, so a failure here never throws away a project
+  // we already have. What came back is kept so the panel can show it.
+  private async getProjectRevision(): Promise<string> {
+    let response = await IHCManager.instance.fetchWithAuth(
+      `/api/ihcviewer/projectinfo/${this.controllerId}`);
+    if (!response.ok) {
+      this.projectInfo = null;
+      return null;
+    }
+    let info = await response.json();
+    this.projectInfo = info;
+    return `${info.projectMajorRevision}.${info.projectMinorRevision}.${info.lastmodified}`;
+  }
+
+  // What the controller says about itself. Read once - it is the hardware,
+  // and that does not change while Home Assistant is running.
+  async getSystemInfo() {
+    if (this.systemInfo === undefined) {
+      let response = await IHCManager.instance.fetchWithAuth(
+        `/api/ihcviewer/systeminfo/${this.controllerId}`);
+      this.systemInfo = response.ok ? await response.json() : null;
+    }
+    return this.systemInfo;
+  }
+
+  // Forget the mapping so it is fetched again. The project is kept - it comes
+  // from the controller and does not change when the ihc integration reloads.
+  // The icons someone has picked for the rooms, keyed by the room's ihc id.
+  // They are kept by the integration rather than in the browser, so the rooms
+  // look the same wherever the panel is opened.
+  async getGroupIcons() {
+    if (this.groupIcons == null) {
+      let response = await IHCManager.instance.fetchWithAuth(
+        `/api/ihcviewer/groupicons/${this.controllerId}`);
+      this.groupIcons = response.ok ? await response.json() : {};
+    }
+    return this.groupIcons;
+  }
+
+  // Pick the icon for one room, or clear it with an empty string. The answer
+  // is the whole set again, so there is one source of truth and no guessing
+  // about what the store now holds.
+  async setGroupIcon(groupId: number, icon: string): Promise<boolean> {
+    let response = await IHCManager.instance.fetchWithAuth(
+      `/api/ihcviewer/groupicons/${this.controllerId}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: groupId, icon: icon }),
+      });
+    if (!response.ok) return false;
+    this.groupIcons = await response.json();
+    return true;
+  }
+
+  clearMapping() {
+    this.ihcmapping = null;
   }
 
   async getMapping() {
 
     if (this.ihcmapping == null) {
       let response = await IHCManager.instance.fetchWithAuth(`/api/ihcviewer/mapping/${this.controllerId}`);
-      if (response.ok) {
-        this.ihcmapping = await response.json();
+      if (!response.ok) {
+        throw new Error(`Could not read the ihc mapping (${response.status} ${response.statusText})`);
       }
+      this.ihcmapping = await response.json();
     }
     return this.ihcmapping;
   }

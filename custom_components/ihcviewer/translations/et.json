@@ -1,0 +1,16 @@
+{
+    "config": {
+        "error": {
+            "unknown": "Tundmatu viga",
+            "already_setup": "See kontroller on juba seadistatud",
+            "no_ihc": "IHC integratsiooni ei leitud",
+            "old_ihc": "Leiti vana IHC integratsioon. Pead oma IHC integratsiooni uuendama"
+        },
+        "step": {
+            "user": {
+                "description": "Lisa Home Assistanti oma IHC kontrolleri vaatur"
+            }
+        }
+    },
+    "title": "IHC Viewer"
+}

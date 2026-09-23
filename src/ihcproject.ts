@@ -3,6 +3,13 @@ export class IHCBase {
   Id: number;
   NodeTagName: string;
 
+  // Filled in after the project has been read, not by the xml. Children is
+  // what the tree draws under this node - rooms, products and function blocks
+  // gather theirs when the project is laid out. filtered is the part of that
+  // list a search has left, and null when no search is on.
+  Children: IHCBase[];
+  filtered: IHCBase[];
+
   constructor(node: Element) {
     this.Name = node.attributes["name"].value;
     var id: string = node.attributes["id"].value;
@@ -75,6 +82,13 @@ export class IHCGroup extends IHCBase {
 export class IHCProduct extends IHCBase {
   Note: string;
   Position: string;
+  // What kind of product this is, as the project describes it. The identifier
+  // is the type itself - _0x2202 is a light outlet whatever anyone has renamed
+  // it to - and IhcIcon is ihc's own icon number, which groups the types into
+  // sensors, sounders, buttons, light outlets and sockets.
+  ProductIdentifier: string;
+  IhcIcon: string;
+  CableNumber: string;
   Inputs: IHCInput[];
   Outputs: IHCOutput[];
 
@@ -84,6 +98,9 @@ export class IHCProduct extends IHCBase {
     this.Outputs = new Array();
     this.Note = node.getAttribute("note") || "";
     this.Position = node.getAttribute("position") || "";
+    this.ProductIdentifier = node.getAttribute("product_identifier") || "";
+    this.IhcIcon = node.getAttribute("icon") || "";
+    this.CableNumber = node.getAttribute("cablenumber") || "";
     this.FindAndAdd(node, "airlink_input", (subnode: Element) => {
       this.Inputs.push(new IHCInput(subnode));
     });
@@ -165,6 +182,26 @@ export class IHCFunctionBlock extends IHCBase {
 }
 
 export class IHCResource extends IHCBase {
+  // The product this resource sits on, filled in when the tree is built. A
+  // resource on a function block belongs to no product and leaves this unset.
+  Product: IHCProduct;
+
+  // Where the resource sits in the tree, filled in at the same time: Parent is
+  // the row right above it - the product or the function block - and Group is
+  // the room. Product is left alone because the panel shows the product's own
+  // fields; Parent is the one that is there whatever the resource hangs on.
+  Parent: IHCBase;
+  Group: IHCGroup;
+
+  // What the resource is in Home Assistant, read from the mapping when the
+  // tree is laid out. None of it comes from the project: connected says it is
+  // an entity at all, platform which of the four it became, and the two names
+  // are what the search looks through.
+  connected: boolean;
+  entity_id: string;
+  platform: string;
+  friendlyName: string;
+
   constructor(node: Element) {
     super(node);
   }

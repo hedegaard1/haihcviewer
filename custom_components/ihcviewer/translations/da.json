@@ -1,0 +1,16 @@
+{
+    "config": {
+        "error": {
+            "unknown": "Ukendt fejl",
+            "already_setup": "Denne controller er allerede sat op",
+            "no_ihc": "Ingen IHC-integration fundet",
+            "old_ihc": "Der er fundet en gammel IHC-integration. Du skal opdatere din IHC-integration"
+        },
+        "step": {
+            "user": {
+                "description": "Tilføj en viewer til din IHC-controller i Home Assistant"
+            }
+        }
+    },
+    "title": "IHC Viewer"
+}

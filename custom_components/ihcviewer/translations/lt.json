@@ -1,0 +1,16 @@
+{
+    "config": {
+        "error": {
+            "unknown": "Nežinoma klaida",
+            "already_setup": "Šis valdiklis jau sukonfigūruotas",
+            "no_ihc": "IHC integracija nerasta",
+            "old_ihc": "Rasta sena IHC integracija. Turite atnaujinti savo IHC integraciją"
+        },
+        "step": {
+            "user": {
+                "description": "Pridėkite į Home Assistant savo IHC valdiklio peržiūros priemonę"
+            }
+        }
+    },
+    "title": "IHC Viewer"
+}
