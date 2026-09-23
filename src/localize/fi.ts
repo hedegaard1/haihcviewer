@@ -101,6 +101,8 @@ export const fi: { [key: string]: string } = {
   used_group: "Ryhmät",
   used_person: "Henkilöt",
   used_dashboard: "Kojelaudat",
+  suggest_product: "Korostettu tuotetyypin perusteella: {0}",
+  suggest_light_level: "Korostettu, koska resurssi on valotaso.",
   add_binary_sensor_button: "Binäärianturi",
   add_light_button: "Valo",
   add_sensor_button: "Anturi",

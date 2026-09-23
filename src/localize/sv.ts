@@ -101,6 +101,8 @@ export const sv: { [key: string]: string } = {
   used_group: "Grupper",
   used_person: "Personer",
   used_dashboard: "Instrumentpaneler",
+  suggest_product: "Framhävd utifrån produkttypen: {0}",
+  suggest_light_level: "Framhävd eftersom resursen är en ljusnivå.",
   add_binary_sensor_button: "Binär sensor",
   add_light_button: "Ljus",
   add_sensor_button: "Sensor",

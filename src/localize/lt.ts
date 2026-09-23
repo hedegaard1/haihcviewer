@@ -101,6 +101,8 @@ export const lt: { [key: string]: string } = {
   used_group: "Grupės",
   used_person: "Asmenys",
   used_dashboard: "Skydeliai",
+  suggest_product: "Paryškinta pagal gaminio tipą: {0}",
+  suggest_light_level: "Paryškinta, nes išteklius yra šviesos lygis.",
   add_binary_sensor_button: "Dvejetainis jutiklis",
   add_light_button: "Šviesa",
   add_sensor_button: "Jutiklis",

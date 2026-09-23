@@ -101,6 +101,8 @@ export const lv: { [key: string]: string } = {
   used_group: "Grupas",
   used_person: "Personas",
   used_dashboard: "Paneļi",
+  suggest_product: "Izcelts pēc produkta tipa: {0}",
+  suggest_light_level: "Izcelts, jo resurss ir gaismas līmenis.",
   add_binary_sensor_button: "Binārais sensors",
   add_light_button: "Gaisma",
   add_sensor_button: "Sensors",

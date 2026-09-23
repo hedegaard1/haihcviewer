@@ -132,6 +132,58 @@ export function filterGroups(groups, text: string, product: string): number {
   return hits;
 }
 
+// What an output on each product type most likely is in Home Assistant. The
+// identifiers and names are the ones in icons.ts. A type that is not here goes
+// by its ihc icon number instead, and one with neither gets no suggestion.
+const OUTPUT_PLATFORM: { [identifier: string]: string } = {
+  "_0x2201": "switch",   // Plug outlet
+  "_0x2202": "light",    // Lamp outlet
+  "_0x2203": "switch",   // Sounder, internal
+  "_0x4201": "switch",   // Plug outlet
+  "_0x4202": "light",    // Lamp outlet relay
+  "_0x4203": "switch",   // Universal relay
+  "_0x4204": "switch",   // Mobile relay
+  "_0x4403": "light",    // Combi relay, 2 buttons
+  "_0x4404": "light",    // Combi relay, 4 buttons
+  "_0x4301": "light",    // Dimmer, mobile
+  "_0x4302": "light",    // Dimmer, lamp outlet
+  "_0x4303": "light",    // Dimmer, mobile
+  "_0x4304": "light",    // Dimmer, lamp outlet
+  "_0x4305": "light",    // Dimmer, blind
+  "_0x4306": "light",    // Dimmer, universal
+  "_0x4307": "light",    // Dimmer, 3 wire puck 1 button
+  "_0x4308": "light",    // Dimmer, 3 wire puck 2 buttons
+  "_0x4401": "light",    // Combi dimmer, 2 buttons touch
+  "_0x4402": "light",    // Combi dimmer, 4 buttons touch
+  "_0x4406": "light",    // Combi dimmer, 4 buttons
+  "_0x4410": "light",    // Rs485 led dimmer channel
+};
+
+// The ihc icon numbers that are outputs - sounders, light outlets and sockets.
+// The sensor and button numbers are left out on purpose: an output on a
+// button is one of its leds, and neither a light nor a switch is the answer.
+const OUTPUT_PLATFORM_BY_IHC_ICON: { [icon: string]: string } = {
+  "_0x84": "switch",
+  "_0x86": "light",
+  "_0x88": "switch",
+};
+
+// Which platform the panel should show first for a resource, or "" when there
+// is nothing to go on. The panel still offers every platform the type allows;
+// this only picks the one that fits the thing the resource sits on.
+//
+// A light level is a light wherever it is. An input on a product is read -
+// a binary sensor, or a sensor for a number. An output goes by the product
+// type. A resource in a function block has no product, so it gets no guess.
+export function suggestPlatform(type: string, isLightLevel: boolean, product, isInput: boolean): string {
+  if (isLightLevel) return "light";
+  if (!product) return "";
+  if (isInput) return type === "bool" ? "binary_sensor" : "sensor";
+  return OUTPUT_PLATFORM[product.ProductIdentifier]
+    || OUTPUT_PLATFORM_BY_IHC_ICON[product.IhcIcon]
+    || "";
+}
+
 // What stops working when an entity goes, in the order the remove dialog lists
 // it. These are the kinds Home Assistant's search/related reports as using an
 // entity. It also reports the entity's device, area, labels and integration,
