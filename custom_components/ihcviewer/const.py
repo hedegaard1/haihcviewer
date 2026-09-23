@@ -10,6 +10,11 @@ IHC_PLATFORMS = ("binary_sensor", "light", "sensor", "switch")
 
 URL_PANEL = "ihc_viewer"
 
+# The sidebar icon is our own drawing, from the icon set in
+# icons/ihcviewer-icons.js, served from this fixed address.
+URL_ICONS = "/ihcviewer_icons"
+SIDEBAR_ICON = "ihcviewer:logo"
+
 # Where the version from manifest.json is kept. The panel is served from
 # /ihcviewer/frontend-<version>/, so the version is what stops a browser from
 # using the panel.js it cached before an update. There used to be a VERSION
