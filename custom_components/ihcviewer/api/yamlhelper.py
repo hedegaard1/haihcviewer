@@ -2,10 +2,9 @@
 import os.path
 from ruamel.yaml import YAML
 
-from homeassistant.components.ihc import IHC_CONTROLLER
 from homeassistant.core import HomeAssistant
 
-from ..const import IHC_PLATFORMS
+from ..const import CONF_CONTROLLER, IHC_PLATFORMS
 
 MANUAL_SETUP_YAML = "ihc_manual_setup.yaml"
 
@@ -61,9 +60,9 @@ def write_manual_setup(hass: HomeAssistant, conf):
 def get_controller_conf(conf, controller_id):
     """Get ihc controller with specified id from config."""
     for controller_conf in conf["ihc"]:
-        if controller_conf[IHC_CONTROLLER] == controller_id:
+        if controller_conf[CONF_CONTROLLER] == controller_id:
             return controller_conf
-    controller_conf = {IHC_CONTROLLER: controller_id}
+    controller_conf = {CONF_CONTROLLER: controller_id}
     conf["ihc"].append(controller_conf)
     return controller_conf
 
