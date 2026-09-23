@@ -9,8 +9,6 @@ export const et: { [key: string]: string } = {
 
   tab_project: "Projekt",
   tab_log: "Logi",
-  reload_project: "Laadi projekt uuesti",
-  reload_project_title: "Loe projekt ihc kontrollerist uuesti. See loetakse ise uuesti, kui kontroller teatab uuest projektist, nii et seda on vaja ainult siis, kui ta üldse revisjoni ei teata.",
   filter_search_placeholder: "Otsi nimest, olemist või ihc id-st",
   filter_all_products: "Kõik tootetüübid",
   filter_count: "{0} / {1}",

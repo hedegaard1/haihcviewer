@@ -9,8 +9,6 @@ export const lv: { [key: string]: string } = {
 
   tab_project: "Projekts",
   tab_log: "Žurnāls",
-  reload_project: "Pārlādēt projektu",
-  reload_project_title: "Vēlreiz nolasīt projektu no ihc kontrollera. Tas notiek pats, kad kontrolleris ziņo par jaunu projektu, tāpēc šis ir vajadzīgs tikai tad, ja tas neziņo nevienu revīziju.",
   filter_search_placeholder: "Meklēt nosaukumā, entitātē vai ihc id",
   filter_all_products: "Visi produktu tipi",
   filter_count: "{0} no {1}",

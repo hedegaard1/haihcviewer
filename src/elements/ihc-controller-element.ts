@@ -347,33 +347,6 @@ export class IhcControllerElement extends LitElement {
         padding: 10px;
         color: var(--error-color, #db4437);
       }
-      /* The same pill as the tabs beside it, because it sits in their row -
-         but outlined rather than filled, and with an icon, because it does
-         something rather than switching between two views. Grey until the
-         mouse is on it: the project is read again by itself when the
-         controller reports a new one, so this is the way out of the rare case
-         where it reports nothing at all, not an everyday button. */
-      #reloadproject {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 14px;
-        padding: 5px 14px 5px 10px;
-        cursor: pointer;
-        border: 1px solid var(--secondary-text-color);
-        border-radius: 16px;
-        color: var(--secondary-text-color);
-      }
-      #reloadproject:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-      }
-      #reloadproject ha-icon {
-        flex: 0 0 auto;
-        width: 18px;
-        height: 18px;
-        --mdc-icon-size: 18px;
-      }
       `
     ];
   }
@@ -446,11 +419,6 @@ export class IhcControllerElement extends LitElement {
           <div class="tab-button ${this.selectedtab == 0 ? 'selected' : ''}" @click=${this.selectTab} data-tabid='0'>${localize("tab_project")}</div>
           <div class="tab-button ${this.selectedtab == 1 ? 'selected' : ''}" @click=${this.selectTab} data-tabid='1'>${localize("tab_log")}</div>
           <span id="headeractions">
-            ${this.selectedtab == 0 ? html`
-              <div id="reloadproject" @click=${this.onReloadProject}
-                title="${localize("reload_project_title")}">
-                <ha-icon icon="mdi:refresh"></ha-icon>${localize("reload_project")}
-              </div>` : ""}
             <slot name="header-actions"></slot>
           </span>
         </div>
@@ -707,12 +675,7 @@ export class IhcControllerElement extends LitElement {
       .filter((node) => node != null);
   }
 
-  async onReloadProject() {
-    if (this.isProjectLoading) return;
-    await this.loadController(true);
-  }
-
-  async loadController(refreshProject = false) {
+  async loadController() {
     this.isProjectLoading = true;
     this.loadError = null;
     // Everything below has to be able to fail without leaving the tab loading
@@ -732,7 +695,7 @@ export class IhcControllerElement extends LitElement {
         }
       }
       this.groupIcons = await controller.getGroupIcons();
-      this.ihcproject = await controller.getProject(refreshProject);
+      this.ihcproject = await controller.getProject();
       this.projectInfo = controller.projectInfo;
       this.systemInfo = await controller.getSystemInfo();
       if (this.ihcproject) {

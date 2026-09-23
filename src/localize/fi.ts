@@ -9,8 +9,6 @@ export const fi: { [key: string]: string } = {
 
   tab_project: "Projekti",
   tab_log: "Loki",
-  reload_project: "Lataa projekti uudelleen",
-  reload_project_title: "Lue projekti ihc-ohjaimelta uudelleen. Se luetaan itsestään uudelleen, kun ohjain ilmoittaa uudesta projektista, joten tätä tarvitaan vain jos se ei ilmoita versiota lainkaan.",
   filter_search_placeholder: "Hae nimestä, entiteetistä tai ihc-tunnuksesta",
   filter_all_products: "Kaikki tuotetyypit",
   filter_count: "{0} / {1}",

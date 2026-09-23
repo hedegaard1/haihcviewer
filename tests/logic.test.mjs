@@ -14,13 +14,54 @@ import {
   entityMentioned,
   filterGroups,
   isEntityId,
+  keepProject,
   platformOf,
   resourceMatches,
+  revisionOf,
   slugify,
   suggestName,
   suggestPlatform,
   usedBy,
 } from "../src/logic.ts";
+
+describe("revisionOf", () => {
+  test("joins the three fields the controller reports", () => {
+    assert.equal(revisionOf({
+      projectMajorRevision: 123456789, projectMinorRevision: 12,
+      lastmodified: "2025-10-14T00:22:00",
+    }), "123456789.12.2025-10-14T00:22:00");
+  });
+
+  test("a controller that reports none of them gives an empty revision", () => {
+    // Not "undefined.undefined.undefined", which is the same every time and
+    // would pass for an unchanged project
+    assert.equal(revisionOf({}), "");
+    assert.equal(revisionOf({ something: "else" }), "");
+  });
+});
+
+describe("keepProject", () => {
+  test("keeps the project while the controller runs the same one", () => {
+    assert.equal(keepProject(true, "1.2.x", "1.2.x"), true);
+  });
+
+  test("reads it again when the controller runs a new one", () => {
+    assert.equal(keepProject(true, "1.2.x", "1.3.y"), false);
+  });
+
+  test("reads it when nothing is held", () => {
+    assert.equal(keepProject(false, null, "1.2.x"), false);
+    assert.equal(keepProject(false, null, null), false);
+  });
+
+  test("keeps it when the controller could not be asked", () => {
+    assert.equal(keepProject(true, "1.2.x", null), true);
+  });
+
+  test("reads it every time when the controller reports no revision", () => {
+    assert.equal(keepProject(true, "", ""), false);
+  });
+});
 
 describe("suggestPlatform", () => {
   const product = (ProductIdentifier, IhcIcon = "") => ({ ProductIdentifier, IhcIcon });

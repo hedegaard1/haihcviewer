@@ -9,8 +9,6 @@ export const da: { [key: string]: string } = {
 
   tab_project: "Projekt",
   tab_log: "Log",
-  reload_project: "Genindlæs projekt",
-  reload_project_title: "Læs projektet fra ihc-controlleren igen. Det sker af sig selv, når controlleren melder et nyt projekt, så den her er kun nødvendig, hvis den slet ikke melder en revision.",
   filter_search_placeholder: "Søg i navn, entitet eller ihc-id",
   filter_all_products: "Alle produkttyper",
   filter_count: "{0} af {1}",

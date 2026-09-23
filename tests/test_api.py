@@ -624,5 +624,24 @@ class ReadProjectTest(unittest.TestCase):
         self.assertIn("_project", "\n".join(log.output))
 
 
+class ServeCachedTest(unittest.TestCase):
+    """Whether the kept project is served again or read from the controller."""
+
+    kept = {"project": "<project/>", "revision": {"projectMajorRevision": "1"}}
+
+    def test_the_same_revision_is_served_from_the_cache(self):
+        self.assertTrue(project.serve_cached(self.kept, {"projectMajorRevision": "1"}))
+
+    def test_a_new_revision_is_read(self):
+        self.assertFalse(project.serve_cached(self.kept, {"projectMajorRevision": "2"}))
+
+    def test_nothing_kept_is_read(self):
+        self.assertFalse(project.serve_cached(None, {"projectMajorRevision": "1"}))
+
+    def test_a_controller_without_a_revision_is_read_every_time(self):
+        # None == None would otherwise keep the first project for good
+        self.assertFalse(project.serve_cached({"project": "<project/>", "revision": None}, None))
+
+
 if __name__ == "__main__":
     unittest.main()

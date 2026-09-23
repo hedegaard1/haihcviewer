@@ -9,8 +9,6 @@ export const lt: { [key: string]: string } = {
 
   tab_project: "Projektas",
   tab_log: "Žurnalas",
-  reload_project: "Įkelti projektą iš naujo",
-  reload_project_title: "Iš naujo nuskaityti projektą iš ihc valdiklio. Tai įvyksta savaime, kai valdiklis praneša apie naują projektą, todėl šis reikalingas tik tada, jei jis išvis nepraneša revizijos.",
   filter_search_placeholder: "Ieškoti pavadinime, objekte arba ihc id",
   filter_all_products: "Visi gaminių tipai",
   filter_count: "{0} iš {1}",
