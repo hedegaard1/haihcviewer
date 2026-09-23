@@ -71,6 +71,7 @@
   <div id="sidebar"></div>
   <div id="app-content"></div>
 
+  <script src="../custom_components/ihcviewer/icons/ihcviewer-icons.js"></script>
   <script>
     // ---- ha-icon ------------------------------------------------------
     // Inside Home Assistant this is a real element from its frontend. Here it
@@ -79,6 +80,10 @@
     // It needs its own shadow root with its own copy of the stylesheet: the
     // page's stylesheets do not reach into a shadow tree, and ha-icon is used
     // inside the panel's. Without this the icons are simply blank.
+    //
+    // An icon from a custom icon set - "ihcviewer:logo" - is drawn from the set
+    // in window.customIcons, the way Home Assistant does it. The set is loaded
+    // below, from the same file Home Assistant loads.
     const MDI_CSS =
       "https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css";
     class HaIconPreview extends HTMLElement {
@@ -88,8 +93,19 @@
       set icon(value) { this.setAttribute("icon", value); }
       get icon() { return this.getAttribute("icon"); }
       render() {
-        const name = (this.getAttribute("icon") || "").replace(/^mdi:/, "");
+        const icon = this.getAttribute("icon") || "";
+        const [set, name] = icon.includes(":") ? icon.split(":") : ["mdi", icon];
         if (!this.shadowRoot) this.attachShadow({ mode: "open" });
+        const custom = set !== "mdi" && window.customIcons && window.customIcons[set];
+        if (custom) {
+          custom.getIcon(name).then(({ path }) => {
+            if (this.getAttribute("icon") !== icon) return;
+            this.shadowRoot.innerHTML =
+              `<svg viewBox="0 0 24 24" style="display:block;width:var(--mdc-icon-size,24px);` +
+              `height:var(--mdc-icon-size,24px)"><path fill="currentColor" d="${path}"/></svg>`;
+          });
+          return;
+        }
         this.shadowRoot.innerHTML =
           `<link rel="stylesheet" href="${MDI_CSS}">` +
           `<span class="mdi mdi-${name}" style="font-size:var(--mdc-icon-size,24px);` +
